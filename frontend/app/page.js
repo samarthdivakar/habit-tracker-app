@@ -3,6 +3,10 @@
 
 import { useState, useEffect } from 'react'
 
+import { motion, AnimatePresence } from 'framer-motion'
+
+import { Plus, Target, TrendingUp, Calendar, CheckCircle2, Flame, Zap } from 'lucide-react'
+
 
 
 export default function Home() {
@@ -13,9 +17,11 @@ export default function Home() {
 
   const [loading, setLoading] = useState(true)
 
+  const [showAddForm, setShowAddForm] = useState(false)
+
+  const [completedToday, setCompletedToday] = useState(new Set())
 
 
-  // Fetch habits from backend
 
   useEffect(() => {
 
@@ -49,8 +55,6 @@ export default function Home() {
 
 
 
-  // Add new habit
-
   const addHabit = async (e) => {
 
     e.preventDefault()
@@ -81,6 +85,8 @@ export default function Home() {
 
         setNewHabit({ name: '', description: '' })
 
+        setShowAddForm(false)
+
       }
 
     } catch (error) {
@@ -92,8 +98,6 @@ export default function Home() {
   }
 
 
-
-  // Log habit completion
 
   const logHabit = async (habitId) => {
 
@@ -117,7 +121,7 @@ export default function Home() {
 
       if (response.ok) {
 
-        alert('Habit logged for today! 🎉')
+        setCompletedToday(new Set([...completedToday, habitId]))
 
       }
 
@@ -131,13 +135,117 @@ export default function Home() {
 
 
 
+  const containerVariants = {
+
+    hidden: { opacity: 0 },
+
+    visible: {
+
+      opacity: 1,
+
+      transition: {
+
+        staggerChildren: 0.1
+
+      }
+
+    }
+
+  }
+
+
+
+  const itemVariants = {
+
+    hidden: { y: 20, opacity: 0 },
+
+    visible: {
+
+      y: 0,
+
+      opacity: 1,
+
+      transition: {
+
+        type: "spring",
+
+        stiffness: 100
+
+      }
+
+    }
+
+  }
+
+
+
+  const habitCardVariants = {
+
+    hidden: { scale: 0.8, opacity: 0 },
+
+    visible: {
+
+      scale: 1,
+
+      opacity: 1,
+
+      transition: {
+
+        type: "spring",
+
+        stiffness: 120,
+
+        damping: 12
+
+      }
+
+    },
+
+    hover: {
+
+      scale: 1.02,
+
+      y: -5,
+
+      transition: {
+
+        type: "spring",
+
+        stiffness: 400,
+
+        damping: 10
+
+      }
+
+    }
+
+  }
+
+
+
   if (loading) {
 
     return (
 
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
 
-        <div className="text-xl">Loading habits...</div>
+        <motion.div
+
+          initial={{ scale: 0.8, opacity: 0 }}
+
+          animate={{ scale: 1, opacity: 1 }}
+
+          transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
+
+          className="text-white text-2xl font-bold flex items-center gap-3"
+
+        >
+
+          <Zap className="w-8 h-8 text-yellow-400" />
+
+          Loading your habits...
+
+        </motion.div>
 
       </div>
 
@@ -149,143 +257,455 @@ export default function Home() {
 
   return (
 
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
 
-      <div className="max-w-4xl mx-auto px-4">
+      {/* Animated Background Elements */}
 
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
+      <div className="absolute inset-0 overflow-hidden">
 
-          🎯 Habit Tracker
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full opacity-20 animate-pulse"></div>
 
-        </h1>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full opacity-20 animate-pulse delay-1000"></div>
+
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500 rounded-full opacity-10 animate-spin" style={{ animationDuration: '20s' }}></div>
+
+      </div>
 
 
 
-        {/* Add New Habit Form */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        {/* Header */}
 
-          <h2 className="text-xl font-semibold mb-4">Add New Habit</h2>
+        <motion.div
 
-          <form onSubmit={addHabit} className="space-y-4">
+          initial={{ y: -50, opacity: 0 }}
 
-            <div>
+          animate={{ y: 0, opacity: 1 }}
 
-              <input
+          transition={{ type: "spring", stiffness: 100 }}
 
-                type="text"
+          className="text-center mb-12"
 
-                placeholder="Habit name (e.g., Drink 8 glasses of water)"
+        >
 
-                value={newHabit.name}
+          <div className="flex items-center justify-center gap-3 mb-4">
 
-                onChange={(e) => setNewHabit({...newHabit, name: e.target.value})}
+            <motion.div
 
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              animate={{ rotate: 360 }}
 
-                required
-
-              />
-
-            </div>
-
-            <div>
-
-              <textarea
-
-                placeholder="Description (optional)"
-
-                value={newHabit.description}
-
-                onChange={(e) => setNewHabit({...newHabit, description: e.target.value})}
-
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-
-                rows="3"
-
-              />
-
-            </div>
-
-            <button
-
-              type="submit"
-
-              className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition-colors font-medium"
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
 
             >
 
-              Add Habit
+              <Target className="w-12 h-12 text-yellow-400" />
 
-            </button>
+            </motion.div>
 
-          </form>
+            <h1 className="text-5xl font-bold text-white">
 
-        </div>
+              Habit<span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">Flow</span>
+
+            </h1>
+
+          </div>
+
+          <p className="text-xl text-gray-300">Transform your life, one habit at a time</p>
+
+        </motion.div>
 
 
 
-        {/* Habits List */}
+        {/* Stats Cards */}
 
-        <div className="space-y-4">
+        <motion.div
 
-          <h2 className="text-xl font-semibold mb-4">Your Habits</h2>
+          variants={containerVariants}
 
-          {habits.length === 0 ? (
+          initial="hidden"
 
-            <div className="text-center py-8 text-gray-500">
+          animate="visible"
 
-              No habits yet. Add your first habit above!
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
 
-            </div>
+        >
 
-          ) : (
+          <motion.div
 
-            habits.map((habit) => (
+            variants={itemVariants}
 
-              <div key={habit.id} className="bg-white rounded-lg shadow-md p-6">
+            className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20"
 
-                <div className="flex justify-between items-start">
+          >
 
-                  <div className="flex-1">
+            <div className="flex items-center gap-3">
 
-                    <h3 className="text-lg font-medium text-gray-800">{habit.name}</h3>
+              <div className="p-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg">
 
-                    {habit.description && (
-
-                      <p className="text-gray-600 mt-1">{habit.description}</p>
-
-                    )}
-
-                    <p className="text-sm text-gray-400 mt-2">
-
-                      Created: {new Date(habit.created_at).toLocaleDateString()}
-
-                    </p>
-
-                  </div>
-
-                  <button
-
-                    onClick={() => logHabit(habit.id)}
-
-                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors ml-4"
-
-                  >
-
-                    ✓ Done Today
-
-                  </button>
-
-                </div>
+                <CheckCircle2 className="w-6 h-6 text-white" />
 
               </div>
 
-            ))
+              <div>
+
+                <p className="text-gray-300 text-sm">Total Habits</p>
+
+                <p className="text-2xl font-bold text-white">{habits.length}</p>
+
+              </div>
+
+            </div>
+
+          </motion.div>
+
+
+
+          <motion.div
+
+            variants={itemVariants}
+
+            className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20"
+
+          >
+
+            <div className="flex items-center gap-3">
+
+              <div className="p-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-lg">
+
+                <Flame className="w-6 h-6 text-white" />
+
+              </div>
+
+              <div>
+
+                <p className="text-gray-300 text-sm">Completed Today</p>
+
+                <p className="text-2xl font-bold text-white">{completedToday.size}</p>
+
+              </div>
+
+            </div>
+
+          </motion.div>
+
+
+
+          <motion.div
+
+            variants={itemVariants}
+
+            className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20"
+
+          >
+
+            <div className="flex items-center gap-3">
+
+              <div className="p-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-lg">
+
+                <TrendingUp className="w-6 h-6 text-white" />
+
+              </div>
+
+              <div>
+
+                <p className="text-gray-300 text-sm">Success Rate</p>
+
+                <p className="text-2xl font-bold text-white">
+
+                  {habits.length > 0 ? Math.round((completedToday.size / habits.length) * 100) : 0}%
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </motion.div>
+
+        </motion.div>
+
+
+
+        {/* Add Habit Button */}
+
+        <motion.div
+
+          initial={{ scale: 0 }}
+
+          animate={{ scale: 1 }}
+
+          transition={{ delay: 0.5, type: "spring", stiffness: 150 }}
+
+          className="flex justify-center mb-8"
+
+        >
+
+          <motion.button
+
+            whileHover={{ scale: 1.05 }}
+
+            whileTap={{ scale: 0.95 }}
+
+            onClick={() => setShowAddForm(!showAddForm)}
+
+            className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3"
+
+          >
+
+            <Plus className="w-6 h-6" />
+
+            Add New Habit
+
+          </motion.button>
+
+        </motion.div>
+
+
+
+        {/* Add Habit Form */}
+
+        <AnimatePresence>
+
+          {showAddForm && (
+
+            <motion.div
+
+              initial={{ opacity: 0, height: 0 }}
+
+              animate={{ opacity: 1, height: "auto" }}
+
+              exit={{ opacity: 0, height: 0 }}
+
+              transition={{ duration: 0.3 }}
+
+              className="mb-8"
+
+            >
+
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 max-w-2xl mx-auto">
+
+                <form onSubmit={addHabit} className="space-y-4">
+
+                  <div>
+
+                    <input
+
+                      type="text"
+
+                      placeholder="What habit do you want to build?"
+
+                      value={newHabit.name}
+
+                      onChange={(e) => setNewHabit({...newHabit, name: e.target.value})}
+
+                      className="w-full p-4 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+
+                      required
+
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <textarea
+
+                      placeholder="Why is this habit important to you?"
+
+                      value={newHabit.description}
+
+                      onChange={(e) => setNewHabit({...newHabit, description: e.target.value})}
+
+                      className="w-full p-4 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+
+                      rows="3"
+
+                    />
+
+                  </div>
+
+                  <div className="flex gap-4">
+
+                    <motion.button
+
+                      whileHover={{ scale: 1.02 }}
+
+                      whileTap={{ scale: 0.98 }}
+
+                      type="submit"
+
+                      className="flex-1 bg-gradient-to-r from-green-400 to-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all"
+
+                    >
+
+                      Create Habit
+
+                    </motion.button>
+
+                    <motion.button
+
+                      whileHover={{ scale: 1.02 }}
+
+                      whileTap={{ scale: 0.98 }}
+
+                      type="button"
+
+                      onClick={() => setShowAddForm(false)}
+
+                      className="px-6 py-3 bg-gray-500/20 text-white rounded-lg font-semibold hover:bg-gray-500/30 transition-all"
+
+                    >
+
+                      Cancel
+
+                    </motion.button>
+
+                  </div>
+
+                </form>
+
+              </div>
+
+            </motion.div>
 
           )}
 
-        </div>
+        </AnimatePresence>
+
+
+
+        {/* Habits Grid */}
+
+        <motion.div
+
+          variants={containerVariants}
+
+          initial="hidden"
+
+          animate="visible"
+
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+
+        >
+
+          {habits.length === 0 ? (
+
+            <motion.div
+
+              variants={itemVariants}
+
+              className="col-span-full text-center py-12"
+
+            >
+
+              <div className="text-gray-400 text-lg">
+
+                <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
+
+                <p>No habits yet. Create your first habit to get started!</p>
+
+              </div>
+
+            </motion.div>
+
+          ) : (
+
+            habits.map((habit) => {
+
+              const isCompleted = completedToday.has(habit.id)
+
+              return (
+
+                <motion.div
+
+                  key={habit.id}
+
+                  variants={habitCardVariants}
+
+                  whileHover="hover"
+
+                  className={`bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 transition-all duration-300 ${
+
+                    isCompleted ? 'ring-2 ring-green-400 bg-green-500/20' : ''
+
+                  }`}
+
+                >
+
+                  <div className="flex justify-between items-start mb-4">
+
+                    <div className="flex-1">
+
+                      <h3 className="text-xl font-semibold text-white mb-2">{habit.name}</h3>
+
+                      {habit.description && (
+
+                        <p className="text-gray-300 text-sm mb-3">{habit.description}</p>
+
+                      )}
+
+                      <p className="text-gray-400 text-xs">
+
+                        Created: {new Date(habit.created_at).toLocaleDateString()}
+
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                  
+
+                  <motion.button
+
+                    whileHover={{ scale: 1.05 }}
+
+                    whileTap={{ scale: 0.95 }}
+
+                    onClick={() => logHabit(habit.id)}
+
+                    disabled={isCompleted}
+
+                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all ${
+
+                      isCompleted
+
+                        ? 'bg-green-500 text-white cursor-not-allowed'
+
+                        : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg'
+
+                    }`}
+
+                  >
+
+                    {isCompleted ? (
+
+                      <span className="flex items-center justify-center gap-2">
+
+                        <CheckCircle2 className="w-5 h-5" />
+
+                        Completed Today!
+
+                      </span>
+
+                    ) : (
+
+                      'Mark as Done'
+
+                    )}
+
+                  </motion.button>
+
+                </motion.div>
+
+              )
+
+            })
+
+          )}
+
+        </motion.div>
 
       </div>
 
